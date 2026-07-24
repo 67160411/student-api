@@ -111,6 +111,26 @@ app.put("/api/v1/students/:id", (req, res) => {
   res.status(200).json({ message: "แก้ไขข้อมูลสำเร็จ", data: student });
 });
 
+// PATCH: แก้ไขข้อมูลบางส่วน
+app.patch("/api/v1/students/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const student = students.find((s) => s.id === id);
+
+  if (!student) {
+    return res.status(404).json({
+      error: { code: "NOT_FOUND", message: "ไม่พบข้อมูลนักศึกษา" },
+    });
+  }
+
+  // อัปเดตเฉพาะฟิลด์ที่ส่งมา ฟิลด์อื่นคงค่าเดิมไว้
+  const { name, major, email } = req.body;
+  if (name !== undefined) student.name = name;
+  if (major !== undefined) student.major = major;
+  if (email !== undefined) student.email = email;
+
+  res.status(200).json({ message: "แก้ไขข้อมูลสำเร็จ", data: student });
+});
+
 // 5. DELETE: ลบข้อมูลนักศึกษา
 app.delete("/api/v1/students/:id", (req, res) => {
   const id = Number(req.params.id);
