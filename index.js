@@ -55,7 +55,23 @@ app.get("/api/v1/students/:id", (req, res) => {
   const student = students.find((s) => s.id === id);
 
   if (!student) {
-    return res.status(404).json({ message: "ไม่พบข้อมูลนักศึกษา" });
+    return res.status(404).json({
+      error: { code: "NOT_FOUND", message: "ไม่พบข้อมูลนักศึกษา" },
+    });
+  }
+
+  const shouldIncludeCourses = req.query.include === "courses";
+
+  if (shouldIncludeCourses) {
+    const studentCourses = courses.filter((c) =>
+      student.courseIds.includes(c.id),
+    );
+    return res
+      .status(200)
+      .json({
+        message: "สำเร็จ",
+        data: { ...student, courses: studentCourses },
+      });
   }
 
   res.status(200).json({ message: "สำเร็จ", data: student });
