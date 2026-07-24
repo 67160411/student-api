@@ -44,7 +44,6 @@ let courses = [
   { id: 102, courseName: "โครงสร้างข้อมูล", credit: 3 },
 ];
 
-
 // 1. GET: ดึงรายการนักศึกษาทั้งหมด
 app.get("/api/v1/students", (req, res) => {
   res.status(200).json({ message: "สำเร็จ", data: students });
@@ -64,17 +63,29 @@ app.get("/api/v1/students/:id", (req, res) => {
 
 // 3. POST: เพิ่มข้อมูลนักศึกษาใหม่
 app.post("/api/v1/students", (req, res) => {
-  const { name, major } = req.body;
+  const { name, major, email } = req.body;
 
-  if (!name || !major) {
-    return res
-      .status(400)
-      .json({ message: "กรุณาระบุ name และ major ให้ครบถ้วน" });
+  if (!name || !major || !email) {
+    return res.status(400).json({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "กรุณาระบุ name, major และ email ให้ครบถ้วน",
+      },
+    });
   }
 
-  const newStudent = { id: nextId++, name, major };
-  students.push(newStudent);
+  const duplicated = students.find((s) => s.email === email);
+  if (duplicated) {
+    return res.status(409).json({
+      error: {
+        code: "DUPLICATE_EMAIL",
+        message: "อีเมลนี้มีอยู่ในระบบแล้ว",
+      },
+    });
+  }
 
+  const newStudent = { id: nextId++, name, major, email };
+  students.push(newStudent);
   res.status(201).json({ message: "เพิ่มข้อมูลสำเร็จ", data: newStudent });
 });
 
@@ -132,7 +143,6 @@ app.get("/api/v1/students/:id/full", (req, res) => {
     data: { ...student, courses: studentCourses },
   });
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server กำลังทำงานที่ http://localhost:${PORT}`);
