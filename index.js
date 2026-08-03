@@ -1,11 +1,25 @@
+require("dotenv").config();
+
 const express = require("express");
+const helmet = require("helmet");
+const cors = require("cors");
+const morgan = require("morgan");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
-const { graphqlHTTP } = require("express-graphql");
-const schema = require("./schema");
-const root = require("./resolvers");
 
-app.use(express.json());
+// ลำดับ middleware มีความสำคัญ: security header → CORS → logger → body parser
+// (ลำดับนี้ต่างจากแผนภาพตัวอย่างในหัวข้อ 1.2 ของ wk04.md ซึ่งวาง Logger ไว้ก่อน Helmet
+// ทั้งสองลำดับใช้ได้ ตราบใดที่ Error-Handling Middleware ยังอยู่ท้ายสุดเสมอ)
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGIN,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  }),
+);
+app.use(morgan("dev"));
+app.use(express.json({ limit: "10kb" }));
 
 app.use(
   "/graphql",
@@ -66,12 +80,10 @@ app.get("/api/v1/students/:id", (req, res) => {
     const studentCourses = courses.filter((c) =>
       student.courseIds.includes(c.id),
     );
-    return res
-      .status(200)
-      .json({
-        message: "สำเร็จ",
-        data: { ...student, courses: studentCourses },
-      });
+    return res.status(200).json({
+      message: "สำเร็จ",
+      data: { ...student, courses: studentCourses },
+    });
   }
 
   res.status(200).json({ message: "สำเร็จ", data: student });
