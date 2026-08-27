@@ -17,6 +17,8 @@ const {
   generateToken,
 } = require("./auth-helpers");
 
+const { authenticateToken, authorizeRole } = require("./middlewares/auth");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -204,17 +206,30 @@ app.patch("/api/v1/students/:id", (req, res) => {
 });
 
 // 5. DELETE: ลบข้อมูลนักศึกษา
-app.delete("/api/v1/students/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const index = students.findIndex((s) => s.id === id);
+app.delete(
+  "/api/v1/students/:id",
+  authenticateToken,
+  authorizeRole("admin"),
+  async (req, res, next) => {
+    try {
+      const [result] = await pool.query("DELETE FROM students WHERE id = ?", [
+        req.params.id,
+      ]);
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          error: { code: "NOT_FOUND", message: "ไม่พบข้อมูลนิสิต" },
+        });
+      }
+      res.status(200).json({ message: "ลบข้อมูลสำเร็จ" });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
-  if (index === -1) {
-    return res.status(404).json({ message: "ไม่พบข้อมูลนักศึกษา" });
-  }
-
-  students.splice(index, 1);
-
-  res.status(200).json({ message: "ลบข้อมูลสำเร็จ" });
+// เพิ่ม route ใหม่: เฉพาะผู้ที่ล็อกอินแล้วเท่านั้นที่ดูข้อมูลของตนเองได้
+app.get("/api/v1/auth/me", authenticateToken, (req, res) => {
+  res.status(200).json({ message: "สำเร็จ", data: req.user });
 });
 
 // คืนข้อมูลนักศึกษาพร้อมรายวิชาที่ลงทะเบียน
