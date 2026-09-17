@@ -1,12 +1,13 @@
 require("dotenv").config();
 const app = require("./app");
 const { connectRedis } = require("./cache");
+
 const PORT = process.env.PORT || 3000;
 
 connectRedis()
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`เซิร์ฟเวอร์ทำงานที่พอร์ต ${PORT}`);
+      console.log(`Server กำลังทำงานที่พอร์ต ${PORT}`);
     });
   })
   .catch((err) => {
