@@ -19,15 +19,8 @@ const {
 
 const { authenticateToken, authorizeRole } = require("./middlewares/auth");
 
-const { redisClient, connectRedis } = require("./cache");
-
-const { parsePagination, parseSort } = require("./middlewares/query-parser");
-
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-const v1Router = express.Router();
-const v2Router = express.Router();
 
 // ลำดับ middleware มีความสำคัญ: security header → CORS → logger → body parser
 // (ลำดับนี้ต่างจากแผนภาพตัวอย่างในหัวข้อ 1.2 ของ wk04.md ซึ่งวาง Logger ไว้ก่อน Helmet
@@ -56,64 +49,47 @@ app.use(
   }),
 );
 
+// Root
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Student API พร้อมใช้งาน" });
+});
+
 // 1. GET: ดึงรายการนักศึกษาทั้งหมด
-v1Router.get(
-  "/students",
-  parsePagination,
-  parseSort,
-  async (req, res, next) => {
-    const { major } = req.query;
-    const { page, limit, offset } = req.pagination;
-    const { field, order } = req.sort;
+app.post("/api/v1/auth/register", async (req, res, next) => {
+  const { email, password } = req.body;
 
-    let baseQuery = "SELECT * FROM students";
-    let countQuery = "SELECT COUNT(*) AS total FROM students";
-    const params = [];
+  if (!email || !password) {
+    return res.status(400).json({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "กรุณาระบุ email และ password",
+      },
+    });
+  }
 
-    if (major) {
-      baseQuery += " WHERE major = ?";
-      countQuery += " WHERE major = ?";
-      params.push(major);
-    }
-
-    baseQuery += ` ORDER BY ${field} ${order} LIMIT ? OFFSET ?`;
-
-    try {
-      const [rows] = await pool.query(baseQuery, [...params, limit, offset]);
-
-      const [[{ total }]] = await pool.query(countQuery, params);
-
-      res.status(200).json({
-        message: "สำเร็จ",
-        data: rows,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      });
-    } catch (err) {
-      next(err);
-    }
-  },
-);
-
-v2Router.get("/students", async (req, res, next) => {
   try {
-    const [rows] = await pool.query("SELECT * FROM students");
+    const passwordHash = await hashPassword(password);
+    const [result] = await pool.query(
+      "INSERT INTO users (email, password_hash, role) VALUES (?, ?, 'student')",
+      [email, passwordHash],
+    );
 
-    res.status(200).json({
-      items: rows,
-      count: rows.length,
+    res.status(201).json({
+      message: "สมัครสมาชิกสำเร็จ",
+      data: { id: result.insertId, email, role: "student" },
     });
   } catch (err) {
+    if (err.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({
+        error: { code: "DUPLICATE_EMAIL", message: "อีเมลนี้มีอยู่ในระบบแล้ว" },
+      });
+    }
     next(err);
   }
 });
 
-// 2. POST: Login
-v1Router.post("/auth/login", async (req, res, next) => {
+// 2. GET: ดึงข้อมูลนักศึกษารายบุคคลตาม id
+app.post("/api/v1/auth/login", async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -159,7 +135,7 @@ v1Router.post("/auth/login", async (req, res, next) => {
 });
 
 // 3. POST: เพิ่มข้อมูลนักศึกษาใหม่
-v1Router.post("/students", async (req, res, next) => {
+app.post("/api/v1/students", async (req, res, next) => {
   const { name, major, email } = req.body;
 
   if (!name || !major || !email) {
@@ -173,9 +149,6 @@ v1Router.post("/students", async (req, res, next) => {
       "INSERT INTO students (name, major, email) VALUES (?, ?, ?)",
       [name, major, email],
     );
-
-    await redisClient.del("students:all"); // ล้างแคชเนื่องจากข้อมูลเปลี่ยนแปลงแล้ว
-
     res.status(201).json({
       message: "เพิ่มข้อมูลสำเร็จ",
       data: { id: result.insertId, name, major, email },
@@ -191,7 +164,7 @@ v1Router.post("/students", async (req, res, next) => {
 });
 
 // 4. PUT: แก้ไขข้อมูลนักศึกษาทั้งระเบียน
-v1Router.put("/students/:id", (req, res) => {
+app.put("/api/v1/students/:id", (req, res) => {
   const id = Number(req.params.id);
   const { name, major } = req.body;
   const student = students.find((s) => s.id === id);
@@ -213,7 +186,7 @@ v1Router.put("/students/:id", (req, res) => {
 });
 
 // PATCH: แก้ไขข้อมูลบางส่วน
-v1Router.patch("/students/:id", (req, res) => {
+app.patch("/api/v1/students/:id", (req, res) => {
   const id = Number(req.params.id);
   const student = students.find((s) => s.id === id);
 
@@ -233,8 +206,8 @@ v1Router.patch("/students/:id", (req, res) => {
 });
 
 // 5. DELETE: ลบข้อมูลนักศึกษา
-v1Router.delete(
-  "/students/:id",
+app.delete(
+  "/api/v1/students/:id",
   authenticateToken,
   authorizeRole("admin"),
   async (req, res, next) => {
@@ -255,12 +228,12 @@ v1Router.delete(
 );
 
 // เพิ่ม route ใหม่: เฉพาะผู้ที่ล็อกอินแล้วเท่านั้นที่ดูข้อมูลของตนเองได้
-v1Router.get("/auth/me", authenticateToken, (req, res) => {
+app.get("/api/v1/auth/me", authenticateToken, (req, res) => {
   res.status(200).json({ message: "สำเร็จ", data: req.user });
 });
 
 // คืนข้อมูลนักศึกษาพร้อมรายวิชาที่ลงทะเบียน
-v1Router.get("/students/:id/full", (req, res) => {
+app.get("/api/v1/students/:id/full", (req, res) => {
   const id = Number(req.params.id);
   const student = students.find((s) => s.id === id);
 
@@ -278,7 +251,7 @@ v1Router.get("/students/:id/full", (req, res) => {
   });
 });
 
-v1Router.post("/students/:id/enrollments", async (req, res, next) => {
+app.post("/api/v1/students/:id/enrollments", async (req, res, next) => {
   const studentId = req.params.id;
   const { courseId } = req.body;
   const connection = await pool.getConnection();
@@ -333,9 +306,6 @@ v1Router.post("/students/:id/enrollments", async (req, res, next) => {
   }
 });
 
-app.use("/api/v1", v1Router);
-app.use("/api/v2", v2Router);
-
 // 404: ไม่พบ route ที่ร้องขอ (ต้องอยู่หลัง route ทั้งหมด)
 app.use((req, res) => {
   res.status(404).json({
@@ -360,13 +330,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-connectRedis()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server กำลังทำงานที่พอร์ต ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("เชื่อมต่อ Redis ไม่สำเร็จ เซิร์ฟเวอร์จะไม่เริ่มทำงาน:", err);
-    process.exit(1);
-  });
+app.listen(PORT, () => {
+  console.log(`Server กำลังทำงานที่พอร์ต ${PORT} (${process.env.NODE_ENV})`);
+});
