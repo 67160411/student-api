@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1789645656832" clover="3.2.0">
-  <project timestamp="1789645656832" name="All files">
-    <metrics statements="235" coveredstatements="106" conditionals="108" coveredconditionals="28" methods="46" coveredmethods="17" elements="389" coveredelements="151" complexity="0" loc="235" ncloc="235" packages="2" files="8" classes="8"/>
+<coverage generated="1790050941594" clover="3.2.0">
+  <project timestamp="1790050941594" name="All files">
+    <metrics statements="235" coveredstatements="97" conditionals="108" coveredconditionals="23" methods="46" coveredmethods="9" elements="389" coveredelements="129" complexity="0" loc="235" ncloc="235" packages="2" files="8" classes="8"/>
     <package name="student-api">
-      <metrics statements="212" coveredstatements="94" conditionals="92" coveredconditionals="24" methods="41" coveredmethods="15"/>
-      <file name="app.js" path="C:\67160411\student-api\app.js">
+      <metrics statements="212" coveredstatements="85" conditionals="92" coveredconditionals="19" methods="41" coveredmethods="7"/>
+      <file name="app.js" path="D:\67160411\student-api\app.js">
         <metrics statements="152" coveredstatements="63" conditionals="58" coveredconditionals="17" methods="17" coveredmethods="4"/>
         <line num="1" count="2" type="stmt"/>
         <line num="3" count="2" type="stmt"/>
@@ -159,7 +159,7 @@
         <line num="398" count="1" type="stmt"/>
         <line num="409" count="2" type="stmt"/>
       </file>
-      <file name="auth-helpers.js" path="C:\67160411\student-api\auth-helpers.js">
+      <file name="auth-helpers.js" path="D:\67160411\student-api\auth-helpers.js">
         <metrics statements="7" coveredstatements="7" conditionals="4" coveredconditionals="2" methods="3" coveredmethods="3"/>
         <line num="1" count="3" type="stmt"/>
         <line num="2" count="3" type="stmt"/>
@@ -169,7 +169,7 @@
         <line num="15" count="3" type="stmt"/>
         <line num="22" count="3" type="stmt"/>
       </file>
-      <file name="cache.js" path="C:\67160411\student-api\cache.js">
+      <file name="cache.js" path="D:\67160411\student-api\cache.js">
         <metrics statements="6" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="0"/>
         <line num="1" count="2" type="stmt"/>
         <line num="3" count="2" type="stmt"/>
@@ -178,22 +178,22 @@
         <line num="9" count="0" type="stmt"/>
         <line num="12" count="2" type="stmt"/>
       </file>
-      <file name="db.js" path="C:\67160411\student-api\db.js">
+      <file name="db.js" path="D:\67160411\student-api\db.js">
         <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="2" type="stmt"/>
         <line num="3" count="2" type="stmt"/>
-        <line num="16" count="2" type="stmt"/>
+        <line num="14" count="2" type="stmt"/>
       </file>
-      <file name="resolvers.js" path="C:\67160411\student-api\resolvers.js">
-        <metrics statements="41" coveredstatements="14" conditionals="30" coveredconditionals="5" methods="19" coveredmethods="8"/>
-        <line num="1" count="3" type="stmt"/>
-        <line num="20" count="3" type="stmt"/>
-        <line num="25" count="3" type="stmt"/>
+      <file name="resolvers.js" path="D:\67160411\student-api\resolvers.js">
+        <metrics statements="41" coveredstatements="5" conditionals="30" coveredconditionals="0" methods="19" coveredmethods="0"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="20" count="2" type="stmt"/>
+        <line num="25" count="2" type="stmt"/>
         <line num="28" count="0" type="stmt"/>
         <line num="30" count="0" type="stmt"/>
-        <line num="34" count="3" type="stmt"/>
-        <line num="37" count="2" type="stmt"/>
-        <line num="38" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="34" count="2" type="stmt"/>
+        <line num="37" count="0" type="stmt"/>
+        <line num="38" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="42" count="0" type="stmt"/>
         <line num="44" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="45" count="0" type="stmt"/>
@@ -201,7 +201,7 @@
         <line num="49" count="0" type="stmt"/>
         <line num="52" count="0" type="stmt"/>
         <line num="55" count="0" type="stmt"/>
-        <line num="57" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="57" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="60" count="0" type="cond" truecount="0" falsecount="4"/>
         <line num="61" count="0" type="stmt"/>
         <line num="63" count="0" type="stmt"/>
@@ -211,9 +211,9 @@
         <line num="79" count="0" type="stmt"/>
         <line num="87" count="0" type="stmt"/>
         <line num="88" count="0" type="stmt"/>
-        <line num="93" count="2" type="stmt"/>
-        <line num="95" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="96" count="1" type="stmt"/>
+        <line num="93" count="0" type="stmt"/>
+        <line num="95" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="96" count="0" type="stmt"/>
         <line num="99" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="100" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="101" count="0" type="cond" truecount="0" falsecount="2"/>
@@ -221,14 +221,14 @@
         <line num="103" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="104" count="0" type="stmt"/>
         <line num="107" count="0" type="stmt"/>
-        <line num="112" count="2" type="stmt"/>
-        <line num="114" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="115" count="1" type="stmt"/>
+        <line num="112" count="0" type="stmt"/>
+        <line num="114" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="115" count="0" type="stmt"/>
         <line num="118" count="0" type="stmt"/>
         <line num="119" count="0" type="stmt"/>
-        <line num="123" count="3" type="stmt"/>
+        <line num="123" count="2" type="stmt"/>
       </file>
-      <file name="schema.js" path="C:\67160411\student-api\schema.js">
+      <file name="schema.js" path="D:\67160411\student-api\schema.js">
         <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="2" type="stmt"/>
         <line num="3" count="2" type="stmt"/>
@@ -237,7 +237,7 @@
     </package>
     <package name="student-api.middlewares">
       <metrics statements="23" coveredstatements="12" conditionals="16" coveredconditionals="4" methods="5" coveredmethods="2"/>
-      <file name="auth.js" path="C:\67160411\student-api\middlewares\auth.js">
+      <file name="auth.js" path="D:\67160411\student-api\middlewares\auth.js">
         <metrics statements="16" coveredstatements="10" conditionals="8" coveredconditionals="4" methods="3" coveredmethods="2"/>
         <line num="1" count="2" type="stmt"/>
         <line num="4" count="2" type="stmt"/>
@@ -256,7 +256,7 @@
         <line num="39" count="0" type="stmt"/>
         <line num="43" count="2" type="stmt"/>
       </file>
-      <file name="query-parser.js" path="C:\67160411\student-api\middlewares\query-parser.js">
+      <file name="query-parser.js" path="D:\67160411\student-api\middlewares\query-parser.js">
         <metrics statements="7" coveredstatements="2" conditionals="8" coveredconditionals="0" methods="2" coveredmethods="0"/>
         <line num="2" count="0" type="stmt"/>
         <line num="6" count="0" type="stmt"/>

@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const {
   hashPassword,
   verifyPassword,
@@ -30,10 +28,7 @@ describe("generateToken", () => {
   test("ควรสร้าง token ที่มี payload ตรงกับข้อมูลผู้ใช้", () => {
     const user = { id: 1, email: "test@example.com", role: "student" };
     const token = generateToken(user);
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "test-secret-key",
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     expect(decoded.id).toBe(user.id);
     expect(decoded.email).toBe(user.email);
