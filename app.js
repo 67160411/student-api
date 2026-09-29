@@ -35,7 +35,15 @@ const app = express();
 const v1Router = express.Router();
 const v2Router = express.Router();
 
-// MIDDLEWARE
+// นำเข้า Swagger UI และ YAML สำหรับการสร้างเอกสาร API
+const swaggerUi = require("swagger-ui-express");
+const YAML = require("js-yaml");
+const fs = require("fs");
+const path = require("path");
+// โหลดไฟล์ openapi.yaml สำหรับเอกสาร API
+const openapiDocument = YAML.load(
+  fs.readFileSync(path.join(__dirname, "openapi.yaml"), "utf8"),
+);
 
 app.use(helmet());
 
@@ -57,6 +65,8 @@ app.use(
     graphiql: true,
   }),
 );
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapiDocument));
 
 // =========================================================
 // GET /api/v1/students
