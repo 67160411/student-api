@@ -1,0 +1,275 @@
+{
+  "info": {
+    "_postman_id": "4558d8ac-fda0-43c7-9836-489e33fce046",
+    "name": "Student API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "56436300",
+    "_collection_link": "https://go.postman.co/collection/56436300-4558d8ac-fda0-43c7-9836-489e33fce046?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {\r\n  pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Response has registration data\", function () {\r\n  const body = pm.response.json();\r\n\r\n  pm.expect(body).to.have.property(\"message\");\r\n  pm.expect(body).to.have.property(\"data\");\r\n  pm.expect(body.data).to.have.property(\"id\");\r\n  pm.expect(body.data).to.have.property(\"email\");\r\n  pm.expect(body.data).to.have.property(\"role\");\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"student{{$timestamp}}@example.com\",\r\n  \"password\": \"Passw0rd!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst jsonData = pm.response.json();\r\n\r\npm.test(\"Message is correct\", function () {\r\n    pm.expect(jsonData.message).to.eql(\"เข้าสู่ระบบสำเร็จ\");\r\n});\r\n\r\npm.test(\"Token exists\", function () {\r\n    pm.expect(jsonData.token).to.exist;\r\n});\r\n\r\npm.environment.set(\"authToken\", jsonData.token);\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"admin1@example.com\",\r\n  \"password\": \"AdminReset2026!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n  pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response has user data\", function () {\r\n  const body = pm.response.json();\r\n\r\n  pm.expect(body).to.have.property(\"data\");\r\n  pm.expect(body.data).to.have.property(\"email\");\r\n  pm.expect(body.data).to.have.property(\"role\");\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Students",
+      "item": [
+        {
+          "name": "Get Students",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n  pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response data is an array\", function () {\r\n  const body = pm.response.json();\r\n\r\n  pm.expect(body).to.have.property(\"message\");\r\n  pm.expect(body.data).to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"Response has pagination\", function () {\r\n  const body = pm.response.json();\r\n\r\n  pm.expect(body).to.have.property(\"pagination\");\r\n  pm.expect(body.pagination).to.have.property(\"page\");\r\n  pm.expect(body.pagination).to.have.property(\"limit\");\r\n  pm.expect(body.pagination).to.have.property(\"total\");\r\n  pm.expect(body.pagination).to.have.property(\"totalPages\");\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/students?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["students"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {\r\n  pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Response has created student\", function () {\r\n  const body = pm.response.json();\r\n\r\n  pm.expect(body).to.have.property(\"data\");\r\n  pm.expect(body.data).to.have.property(\"id\");\r\n  pm.expect(body.data).to.have.property(\"name\");\r\n  pm.expect(body.data).to.have.property(\"major\");\r\n  pm.expect(body.data).to.have.property(\"email\");\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"สมชาย ใจดี\",\r\n  \"major\": \"Information Technology\",\r\n  \"email\": \"student{{$timestamp}}@example.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/students",
+              "host": ["{{baseUrl}}"],
+              "path": ["students"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n  pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response has updated student\", function () {\r\n  const body = pm.response.json();\r\n\r\n  pm.expect(body).to.have.property(\"message\");\r\n  pm.expect(body).to.have.property(\"data\");\r\n  pm.expect(body.data).to.have.property(\"id\");\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"ทดสอบ Postman แก้ไขแล้ว\",\r\n  \"major\": \"เทคโนโลยีสารสนเทศ\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/students/10",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "10"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst jsonData = pm.response.json();\r\n\r\npm.test(\"Delete success\", function () {\r\n    pm.expect(jsonData.message).to.eql(\"ลบข้อมูลสำเร็จ\");\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/students/11",
+              "host": ["{{baseUrl}}"],
+              "path": ["students", "11"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
