@@ -1,4 +1,3 @@
-// services/enrichment-service.js
 const { fetchWithRetry } = require("./external-api");
 
 async function getStudentEnrichment(studentId) {
@@ -6,6 +5,7 @@ async function getStudentEnrichment(studentId) {
 
   try {
     const data = await fetchWithRetry(url, 3000, 2);
+
     return {
       source: "external",
       available: true,
@@ -15,6 +15,7 @@ async function getStudentEnrichment(studentId) {
     console.error(
       `[enrichment-service] external API unavailable after retries: ${error.message}`,
     );
+
     return {
       source: "fallback",
       available: false,
@@ -23,4 +24,6 @@ async function getStudentEnrichment(studentId) {
   }
 }
 
-module.exports = { getStudentEnrichment };
+module.exports = {
+  getStudentEnrichment,
+};

@@ -9,6 +9,9 @@ const cors = require("cors");
 // นำเข้า Morgan สำหรับแสดง Log ของ HTTP Request
 const morgan = require("morgan");
 
+// นำเข้า Pool ของ MySQL สำหรับเชื่อมต่อฐานข้อมูล
+const { getStudentEnrichment } = require("./services/enrichment-service");
+
 // นำเข้า express-graphql สำหรับสร้าง GraphQL API
 const { graphqlHTTP } = require("express-graphql");
 const schema = require("./schema");
@@ -658,6 +661,25 @@ v1Router.post("/students/:id/enrollments", async (req, res, next) => {
     }
   }
 });
+
+v1Router.get(
+  "/students/:id/enrichment",
+  authenticateToken,
+  async (req, res, next) => {
+    try {
+      const enrichment = await getStudentEnrichment(req.params.id);
+
+      return res.status(200).json({
+        data: {
+          studentId: req.params.id,
+          enrichment,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
 // ===========
 // ROUTERS
