@@ -1,10 +1,10 @@
-﻿{
+{
   "id": "77024ebe-1d81-4061-b0ea-58331730ab65",
   "name": "student-api-dev",
   "values": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3000",
+      "value": "http://localhost:3000/api/v1",
       "type": "default",
       "enabled": true
     },
