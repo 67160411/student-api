@@ -9,8 +9,14 @@ const cors = require("cors");
 // นำเข้า Morgan สำหรับแสดง Log ของ HTTP Request
 const morgan = require("morgan");
 
+// นำเข้า Middleware สำหรับจำกัดจำนวน Request ต่อช่วงเวลา
+const { authLimiter, generalLimiter } = require("./middlewares/rateLimiter");
+
 // นำเข้า Pool ของ MySQL สำหรับเชื่อมต่อฐานข้อมูล
 const { getStudentEnrichment } = require("./services/enrichment-service");
+
+// นำเข้า Schema ของ Student สำหรับการตรวจสอบข้อมูลที่ส่งเข้ามา
+const { createStudentSchema } = require("./schemas/studentSchema");
 
 // นำเข้า express-graphql สำหรับสร้าง GraphQL API
 const { graphqlHTTP } = require("express-graphql");
@@ -58,6 +64,9 @@ app.use(
 );
 app.use(morgan("dev"));
 app.use(express.json({ limit: "10kb" }));
+
+app.set("trust proxy", 1);
+app.use(generalLimiter);
 
 // GRAPHQL
 app.use(
@@ -208,20 +217,28 @@ v1Router.post("/auth/login", async (req, res, next) => {
 //========================
 
 v1Router.post("/students", async (req, res, next) => {
-  const { name, major, email } = req.body;
+  // ตรวจสอบข้อมูลด้วย Zod Schema
+  const result = createStudentSchema.safeParse(req.body);
 
-  // ตรวจสอบว่ามีการส่ง name, major และ email มาหรือไม่
-  // ถ้าไม่มีให้ส่ง response 400 Bad Request พร้อมข้อความแจ้งเตือน
-  if (!name || !major || !email) {
+  // หากข้อมูลไม่ผ่านการตรวจสอบ ให้ส่ง HTTP 400
+  if (!result.success) {
     return res.status(400).json({
       error: {
         code: "VALIDATION_ERROR",
-        message: "กรุณาระบุข้อมูลให้ครบถ้วน",
+        message: "ข้อมูลที่ส่งมาไม่ถูกต้อง",
+        details: result.error.issues.map((issue) => ({
+          field: issue.path.join("."),
+          message: issue.message,
+        })),
       },
     });
   }
 
+  // ดึงเฉพาะข้อมูลที่ผ่านการตรวจสอบแล้ว
+  const { name, major, email } = result.data;
+
   try {
+    // บันทึกข้อมูลลงฐานข้อมูล
     const [result] = await pool.query(
       `INSERT INTO students
         (name, major, email)
@@ -229,10 +246,10 @@ v1Router.post("/students", async (req, res, next) => {
       [name, major, email],
     );
 
-    // ลบ Cache ของข้อมูลนักศึกษาทั้งหมดออกจาก Redis เพื่อให้ข้อมูลที่ดึงมาครั้งถัดไปเป็นข้อมูลล่าสุด
+    // ลบ Cache เพื่อให้ข้อมูลครั้งถัดไปเป็นข้อมูลล่าสุด
     await redisClient.del("students:all");
 
-    // ส่ง response 201 Created พร้อมข้อมูลนักศึกษาที่เพิ่มเข้ามา
+    // ส่งผลลัพธ์กลับเมื่อเพิ่มข้อมูลสำเร็จ
     res.status(201).json({
       message: "เพิ่มข้อมูลสำเร็จ",
       data: {
@@ -243,9 +260,8 @@ v1Router.post("/students", async (req, res, next) => {
       },
     });
   } catch (err) {
-    // ตรวจสอบว่ามีข้อผิดพลาดเกิดขึ้นหรือไม่
+    // ตรวจสอบอีเมลซ้ำ
     if (err.code === "ER_DUP_ENTRY") {
-      // ถ้าเกิดข้อผิดพลาดเนื่องจากอีเมลซ้ำ ให้ส่ง response 409 Conflict พร้อมข้อความแจ้งเตือน
       return res.status(409).json({
         error: {
           code: "DUPLICATE_EMAIL",
@@ -686,6 +702,7 @@ v1Router.get(
 // ===========
 
 // กำหนด Router สำหรับ API v1 และ v2
+app.use("/api/v1/auth/login", authLimiter);
 app.use("/api/v1", v1Router);
 app.use("/api/v2", v2Router);
 
